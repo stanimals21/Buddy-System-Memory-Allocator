@@ -12,7 +12,7 @@ public:
 	// think about what else should be included as member variables
 	int block_size;  // size of the block
 	BlockHeader* next; // pointer to the next block
-	bool isFree;
+	bool isFree; 
 };
 
 class LinkedList{
@@ -20,8 +20,14 @@ class LinkedList{
 public:
 	BlockHeader* head;		// you need a head of the list
 public:
-	void insert (BlockHeader* b){	// adds a block to the list
-
+	void insert (BlockHeader* b) // adds a block to the list
+	{	
+		BlockHeader* front = head;
+		while(front->next != NULL)
+		{
+			BlockHeader* track = track->next;
+		}
+		front->next = b;
 	}
 
 	void remove (BlockHeader* b){  // removes a block from the list
