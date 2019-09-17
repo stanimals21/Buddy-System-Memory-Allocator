@@ -1,14 +1,24 @@
 #include "BuddyAllocator.h"
+#include "math.h"
 #include <iostream>
 using namespace std;
 
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
-  // initialize variables for bbs and memory size
-	int bbs = _basic_block_size;
-  int totalMem = _total_memory_length;
+  // ensure that bbs and total_mem are multiples of 2
+  int bbs = pow(2,ceil(log2(_basic_block_size))); // ceil function to make sure that X in a 2^X size is an integer
+  int total_mem_value = pow(2,ceil(log(_total_memory_length)));
 
+  // initialize address pointing to head of memory chunk
+  total_mem_ptr = new char(_total_memory_length);
+
+  // create FreeList
+  BlockHeader* fullBlock = (BlockHeader*) total_mem_ptr; // initial block
+  fullBlock->block_size = total_mem_value;
+  fullBlock->isFree = true;
+  fullBlock->next = nullptr;
+
+  // calculate number of lists in FreeList
   
-
 }
 
 BuddyAllocator::~BuddyAllocator (){

@@ -12,29 +12,72 @@ public:
 	// think about what else should be included as member variables
 	int block_size;  // size of the block
 	BlockHeader* next; // pointer to the next block
-	bool isFree; 
+	bool isFree;
 };
 
 class LinkedList{
 	// this is a special linked list that is made out of BlockHeader s. 
 public:
 	BlockHeader* head;		// you need a head of the list
+	int listSize = 0;
 public:
 	void insert (BlockHeader* b) // adds a block to the list
 	{	
-		BlockHeader* front = head;
-		while(front->next != NULL)
-		{
-			BlockHeader* track = track->next;
+		// if linked list is empty
+		if(head==nullptr){
+			head = b;
+			listSize++;
 		}
-		front->next = b;
+		// if linked list not empty (insert at front)
+		else{
+			b->next = head;
+			head = b;
+			listSize++;
+		}
 	}
 
 	void remove (BlockHeader* b){  // removes a block from the list
+		BlockHeader* it = head;
 
+		// if b is the first blockheader
+		if(it == head){
+			BlockHeader* temp = head;
+			
+			// if list has more than one blockheader
+			if(it->next != nullptr)
+			{
+				head = it->next;
+				listSize--;
+			}
+			else // if list only has one blockheader
+			{
+				head = nullptr;
+				listSize--;
+			}
+		}
+		
+		// if b is not first blockheader
+		else if(it != head){
+			it = head->next;
+			BlockHeader* prevIt = head;
+
+			while(it != b)
+			{
+				// check if b is late node
+				if(it->next == nullptr)
+				{
+					prevIt->next = nullptr;
+					listSize++;
+					return;
+				}
+				it = it->next;
+				prevIt = prevIt->next;
+			}
+			prevIt->next = it->next;
+			listSize++;
+		}
 	}
 };
-
 
 class BuddyAllocator{
 private:
@@ -42,6 +85,7 @@ private:
 	vector<LinkedList> FreeList;
 	int basic_block_size;
 	int total_memory_size;
+	char* total_mem_ptr;
 
 private:
 	/* private function you are required to implement
