@@ -3,33 +3,44 @@
 #include <iostream>
 using namespace std;
 
-// BuddyAllocator Functions
+// private BuddyAllocator Functions
 
 BlockHeader* BuddyAllocator::split(BlockHeader* block) {
-  char* leftAddr = (char*) block;
-  char* rightAddr = (char*) ((block->block_size/2) + rightAddr);
+  char* rightAddr = (char*) block + (block->block_size/2);
 
   // create two new blocks
-  BlockHeader* rightBlock_addr = (BlockHeader*)rightAddr;
-  BlockHeader* leftBlock_addr = (BlockHeader*) leftAddr;
+  BlockHeader* rightBlock_addr = (BlockHeader*) rightAddr;
 
-  // rightBlock_addr->block_size = block->block_size/2;
-  // leftBlock_addr->block_size = block->block_size/2;
+  rightBlock_addr->block_size = block->block_size/2;
+  block->block_size = block->block_size/2;
   
   int freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
   int deleteList_loc = log2(block->block_size/basic_block_size);
 
   // insert new nodes
   FreeList[freeList_loc].insert(rightBlock_addr);
-  FreeList[freeList_loc].insert(leftBlock_addr);
+  FreeList[freeList_loc].insert(block);
 
   // delete old node
-  FreeList[deleteList_loc].remove(leftBlock_addr);
+  FreeList[deleteList_loc].remove(block);
   
   // return one of the old block's locations
   return rightBlock_addr;
 
 };
+
+BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
+
+}
+
+bool BuddyAllocator::arebuddies (BlockHeader* block1, BlockHeader* block2){
+
+}
+
+BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
+
+}
+
 
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
   basic_block_size = _basic_block_size;
@@ -84,16 +95,17 @@ char* BuddyAllocator::alloc(int _length) {
     {
       // skip iteration
     }
-    else if(FreeList[i].head->block_size >= _length)
+    else if(FreeList[i].head->block_size >= _length + sizeof(space_addr))
     {
       space_addr = FreeList[i].head;
+      break;
     }
   }
   
   BlockHeader* track = space_addr;
-  while(track->block_size > _length) {
+  while(track->block_size > _length + sizeof(space_addr)) {
     track = split(track);
-    if(track->block_size/2 < _length) {break;}
+    if(track->block_size/2 < _length + sizeof(space_addr)) {break;}
   }
   
   // assign attributes to new block
@@ -117,7 +129,7 @@ void BuddyAllocator::printlist (){
     BlockHeader* b = FreeList [i].head;
     // go through the list from head to tail and count
     while (b){
-      count ++;
+      count++;
       // block size at index should always be 2^i * bbs
       // checking to make sure that the block is not out of place
       if (b->block_size != (1<<i) * basic_block_size){
