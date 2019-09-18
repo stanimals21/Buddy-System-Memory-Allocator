@@ -19,62 +19,59 @@ class LinkedList{
 	// this is a special linked list that is made out of BlockHeader s. 
 public:
 	BlockHeader* head;		// you need a head of the list
-	int listSize = 0;
 public:
 	void insert (BlockHeader* b) // adds a block to the list
 	{	
-		// if linked list is empty
-		if(head==nullptr){
-			head = b;
-			listSize++;
-		}
-		// if linked list not empty (insert at front)
-		else{
+		// // if linked list is empty
+		// if(head==nullptr){
+		// 	head = b;
+		// 	listSize++;
+		// }
+		// // if linked list not empty (insert at front)
+		// else{
 			b->next = head;
 			head = b;
-			listSize++;
-		}
+		// }
+		// b->next = head;
+		// head = b;
 	}
 
 	void remove (BlockHeader* b){  // removes a block from the list
 		BlockHeader* it = head;
 
 		// if b is the first blockheader
-		if(it == head){
-			BlockHeader* temp = head;
-			
+		if(it == b){
+						
 			// if list has more than one blockheader
-			if(it->next != nullptr)
+			if(it->next == nullptr)
 			{
 				head = it->next;
-				listSize--;
 			}
 			else // if list only has one blockheader
 			{
 				head = nullptr;
-				listSize--;
 			}
 		}
 		
-		// if b is not first blockheader
-		else if(it != head){
+		// if b is not first blockheader (error here)
+		else if(it != b){
 			it = head->next;
 			BlockHeader* prevIt = head;
 
-			while(it != b)
+			while(it != b && it != nullptr)
 			{
-				// check if b is late node
-				if(it->next == nullptr)
-				{
-					prevIt->next = nullptr;
-					listSize++;
-					return;
-				}
 				it = it->next;
 				prevIt = prevIt->next;
+
+				// // check if b is last node
+				// if(it->next == nullptr)
+				// {
+				// 	prevIt->next = nullptr;
+				// 	return;
+				// }
 			}
 			prevIt->next = it->next;
-			listSize++;
+			return;
 		}
 	}
 };
