@@ -29,17 +29,20 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
 
 };
 
-BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
-
-}
+// BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
+  
+// }
 
 bool BuddyAllocator::arebuddies (BlockHeader* block1, BlockHeader* block2){
+  // checks to see if buddies are free
+  if(block1->isFree == true && block2->isFree == true) {return true;}
+  else {return false;}
 
 }
 
-BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
+// BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
 
-}
+// }
 
 
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
@@ -51,7 +54,7 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
   int total_mem_value = pow(2,ceil(log2(_total_memory_length)));
 
   // initialize address pointing to head of memory chunk
-  total_mem_ptr = new char(_total_memory_length);
+  total_mem_ptr = new char[_total_memory_length];
 
   // create FreeList
   BlockHeader* fullBlock = (BlockHeader*) total_mem_ptr; // initial block
@@ -95,7 +98,7 @@ char* BuddyAllocator::alloc(int _length) {
     {
       // skip iteration
     }
-    else if(FreeList[i].head->block_size >= _length + sizeof(space_addr))
+    else if(FreeList[i].head->block_size >= _length + sizeof(BlockHeader))
     {
       space_addr = FreeList[i].head;
       break;
@@ -103,16 +106,16 @@ char* BuddyAllocator::alloc(int _length) {
   }
   
   BlockHeader* track = space_addr;
-  while(track->block_size > _length + sizeof(space_addr)) {
+  while(track->block_size > _length + sizeof(BlockHeader)) {
     track = split(track);
-    if(track->block_size/2 < _length + sizeof(space_addr)) {break;}
+    if(track->block_size/2 < _length + sizeof(BlockHeader)) {break;}
   }
   
   // assign attributes to new block
   track->block_size = _length;
   track->isFree = false;
 
-  return (char*) track;
+  return (char*) (track+1);
 }
 
 int BuddyAllocator::free(char* _a) {
