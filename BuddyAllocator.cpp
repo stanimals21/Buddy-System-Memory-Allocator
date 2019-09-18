@@ -12,6 +12,9 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   // create two new blocks
   BlockHeader* rightBlock_addr = (BlockHeader*)rightAddr;
   BlockHeader* leftBlock_addr = (BlockHeader*) leftAddr;
+
+  // rightBlock_addr->block_size = block->block_size/2;
+  // leftBlock_addr->block_size = block->block_size/2;
   
   int freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
   int deleteList_loc = log2(block->block_size/basic_block_size);
@@ -29,6 +32,9 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
 };
 
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
+  basic_block_size = _basic_block_size;
+  total_memory_size = _total_memory_length;
+  
   // ensure that bbs and total_mem are multiples of 2
   int bbs = pow(2,ceil(log2(_basic_block_size))); // ceil function to make sure that X in a 2^X size is an integer
   int total_mem_value = pow(2,ceil(log2(_total_memory_length)));
@@ -66,9 +72,35 @@ char* BuddyAllocator::alloc(int _length) {
      Of course this needs to be replaced by your implementation.
   */
   
- // iterate FreeList to find smallest block to fits our memory length
+ // iterate through FreeList to find smallest BlockHeader to fit our memory length (start at index 0)
+  BlockHeader* space_addr;
+  for(int i = 0; i < FreeList.size(); i++){
+    if(FreeList[i].head == nullptr && i == FreeList.size()-1)
+    {
+      return nullptr;
+    }
+
+    if(FreeList[i].head == nullptr)
+    {
+      // skip iteration
+    }
+    else if(FreeList[i].head->block_size >= _length)
+    {
+      space_addr = FreeList[i].head;
+    }
+  }
   
-  return new char [_length];
+  BlockHeader* track = space_addr;
+  while(track->block_size > _length) {
+    track = split(track);
+    if(track->block_size/2 < _length) {break;}
+  }
+  
+  // assign attributes to new block
+  track->block_size = _length;
+  track->isFree = false;
+
+  return (char*) track;
 }
 
 int BuddyAllocator::free(char* _a) {

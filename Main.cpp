@@ -12,8 +12,8 @@ void easytest(BuddyAllocator* ba){
   // now print again, how should the list look now
   ba->printlist ();
 
-  ba->free (mem); // give back the memory you just allocated
-  ba->printlist(); // shouldn't the list now look like as in the beginning
+  //ba->free (mem); // give back the memory you just allocated
+  //ba->printlist(); // shouldn't the list now look like as in the beginning
 
 }
 
@@ -29,9 +29,9 @@ int main(int argc, char ** argv) {
 
   
   // stress-test the memory manager, do this only after you are done with small test cases
-  Ackerman* am = new Ackerman ();
-  am->test(allocator); // this is the full-fledged test. 
+  //Ackerman* am = new Ackerman ();
+  //am->test(allocator); // this is the full-fledged test. 
   
   // destroy memory manager
-  delete allocator;
+  //delete allocator;
 }
