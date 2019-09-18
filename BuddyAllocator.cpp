@@ -3,10 +3,35 @@
 #include <iostream>
 using namespace std;
 
+// BuddyAllocator Functions
+
+BlockHeader* BuddyAllocator::split(BlockHeader* block) {
+  char* leftAddr = (char*) block;
+  char* rightAddr = (char*) ((block->block_size/2) + rightAddr);
+
+  // create two new blocks
+  BlockHeader* rightBlock_addr = (BlockHeader*)rightAddr;
+  BlockHeader* leftBlock_addr = (BlockHeader*) leftAddr;
+  
+  int freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
+  int deleteList_loc = log2(block->block_size/basic_block_size);
+
+  // insert new nodes
+  FreeList[freeList_loc].insert(rightBlock_addr);
+  FreeList[freeList_loc].insert(leftBlock_addr);
+
+  // delete old node
+  FreeList[deleteList_loc].remove(leftBlock_addr);
+  
+  // return one of the old block's locations
+  return rightBlock_addr;
+
+};
+
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
   // ensure that bbs and total_mem are multiples of 2
   int bbs = pow(2,ceil(log2(_basic_block_size))); // ceil function to make sure that X in a 2^X size is an integer
-  int total_mem_value = pow(2,ceil(log(_total_memory_length)));
+  int total_mem_value = pow(2,ceil(log2(_total_memory_length)));
 
   // initialize address pointing to head of memory chunk
   total_mem_ptr = new char(_total_memory_length);
@@ -17,12 +42,22 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
   fullBlock->isFree = true;
   fullBlock->next = nullptr;
 
-  // calculate number of lists in FreeList
+  // calculate number of lists in FreeList and pushback that many freelists
+  for(int i =0; i<log2(total_mem_value)-log2(bbs)+1; i++){
+    FreeList.push_back(LinkedList());
+  }
   
+  // add fullBlock to FreeList
+  FreeList[log2(total_mem_value)-log2(bbs)].insert(fullBlock); // smallest(index 0) to largest(index x)
 }
 
 BuddyAllocator::~BuddyAllocator (){
-	
+	for(int i=0; i<FreeList.size(); i++)
+  {
+    while(FreeList[0].head != nullptr){
+      delete FreeList[0].head->next;
+    }
+  }
 }
 
 char* BuddyAllocator::alloc(int _length) {
@@ -30,6 +65,9 @@ char* BuddyAllocator::alloc(int _length) {
      the C standard library! 
      Of course this needs to be replaced by your implementation.
   */
+  
+ // iterate FreeList to find smallest block to fits our memory length
+  
   return new char [_length];
 }
 

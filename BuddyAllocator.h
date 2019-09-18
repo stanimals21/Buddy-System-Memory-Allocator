@@ -12,7 +12,7 @@ public:
 	// think about what else should be included as member variables
 	int block_size;  // size of the block
 	BlockHeader* next; // pointer to the next block
-	bool isFree;
+	bool isFree = true;
 };
 
 class LinkedList{
