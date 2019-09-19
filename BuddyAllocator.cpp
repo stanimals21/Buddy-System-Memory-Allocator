@@ -24,7 +24,7 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
   int listSize = log2(total_mem_value)-log2(bbs)+1;
   for(int i =0; i<listSize; i++){
     FreeList.push_back(LinkedList());
-    //FreeList.at(i).head = NULL;
+    FreeList.at(i).head = NULL;
   }
 
   // add fullBlock to FreeList
@@ -56,12 +56,12 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   int freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
   //int deleteList_loc = log2(block->block_size/basic_block_size); (useless)
 
+  // delete old node
+  FreeList[freeList_loc+1].remove(block);
+
   // insert new nodes
   FreeList[freeList_loc].insert(rightBlock_addr);
   FreeList[freeList_loc].insert(leftBlock_addr);
-
-  // delete old node
-  FreeList[freeList_loc+1].remove(block);
   
   // return one of the old block's locations
   return rightBlock_addr;
@@ -113,15 +113,16 @@ char* BuddyAllocator::alloc(int _length) {
   }
   
   BlockHeader* track = space_addr;
-  while(track->block_size > _length + sizeof(BlockHeader)) {
+  while((track->block_size/2 >= (_length + sizeof(BlockHeader))) && (track->block_size/2 >= basic_block_size)) {
     track = split(track);
-    if(track->block_size/2 < _length + sizeof(BlockHeader) || track->block_size/2 < basic_block_size) 
-    {break;}
   }
   
-  // assign attributes to new block (tentative)
+  // assign attributes to new block (allocating BlockHeader)
   track->block_size = _length;
   track->isFree = false;
+
+  // remove block from FreeList
+  //FreeList[0].remove(track);
 
   return (char*) (track+1);
 }
