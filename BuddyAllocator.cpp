@@ -53,7 +53,7 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   rightBlock_addr->block_size = block->block_size/2;
   leftBlock_addr->block_size = block->block_size/2;
   
-  int freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
+  freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
   //int deleteList_loc = log2(block->block_size/basic_block_size); (useless)
 
   // delete old node
@@ -121,9 +121,10 @@ char* BuddyAllocator::alloc(int _length) {
   track->block_size = _length;
   track->isFree = false;
 
-  // remove block from FreeList
-  //FreeList[0].remove(track);
+  // remove last element
+  FreeList[freeList_loc].remove(track);
 
+  // return removed element
   return (char*) (track+1);
 }
 
@@ -144,10 +145,10 @@ void BuddyAllocator::printlist (){
       count++;
       // block size at index should always be 2^i * bbs
       // checking to make sure that the block is not out of place
-      // if (b->block_size != (1<<i) * basic_block_size){
-      //   cerr << "ERROR:: Block is in a wrong list" << endl;
-      //   exit (-1);
-      // }
+      if (b->block_size != (1<<i) * basic_block_size){
+        cerr << "ERROR:: Block is in a wrong list" << endl;
+        exit (-1);
+      }
       b = b->next;
     }
     cout << count << endl;  

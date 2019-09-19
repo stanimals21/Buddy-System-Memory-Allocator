@@ -22,18 +22,8 @@ public:
 public:
 	void insert (BlockHeader* b) // adds a block to the list
 	{	
-		// // if linked list is empty
-		// if(head==nullptr){
-		// 	head = b;
-		// 	listSize++;
-		// }
-		// // if linked list not empty (insert at front)
-		// else{
 			b->next = head;
 			head = b;
-		// }
-		// b->next = head;
-		// head = b;
 	}
 
 	void remove (BlockHeader* b){  // removes a block from the list
@@ -83,6 +73,7 @@ private:
 	int basic_block_size;
 	int total_memory_size;
 	char* total_mem_ptr;
+	int freeList_loc;
 
 private:
 	/* private function you are required to implement
