@@ -24,14 +24,14 @@ public:
 	{	
 			b->next = head;
 			head = b;
+			b->isFree = true;
 	}
 
 	void remove (BlockHeader* b){  // removes a block from the list
 		BlockHeader* it = head;
 
 		// if b is the first blockheader
-		if(it == b){
-						
+		if(it == b){			
 			// if list has more than one blockheader
 			if(it->next == nullptr)
 			{
@@ -52,13 +52,6 @@ public:
 			{
 				it = it->next;
 				prevIt = prevIt->next;
-
-				// // check if b is last node
-				// if(it->next == nullptr)
-				// {
-				// 	prevIt->next = nullptr;
-				// 	return;
-				// }
 			}
 			prevIt->next = it->next;
 			return;

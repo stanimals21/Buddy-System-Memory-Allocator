@@ -32,18 +32,18 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
 }
 
 BuddyAllocator::~BuddyAllocator (){
-	for(int i=0; i<FreeList.size(); i++)
-  {
-    while(FreeList[0].head != nullptr){
-      delete FreeList[0].head->next;
-    }
-  }
+	// for(int i=0; i<FreeList.size(); i++)
+  // {
+  //   while(FreeList[i].head != NULL){
+  //     delete FreeList;
+  //   }
+  // }
 }
 
 // private BuddyAllocator Functions
 
 BlockHeader* BuddyAllocator::split(BlockHeader* block) {
-  char* rightAddr = (char*) block + (block->block_size/2);
+  char* rightAddr = (char*) block + block->block_size/2;
   char* leftAddr = (char*) block;
 
   // create two new blocks
@@ -53,13 +53,12 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   rightBlock_addr->block_size = block->block_size/2;
   leftBlock_addr->block_size = block->block_size/2;
   
-  freeList_loc = log2(rightBlock_addr->block_size/basic_block_size);
-  //int deleteList_loc = log2(block->block_size/basic_block_size); (useless)
+  freeList_loc = int(log2(ceil((double)(rightBlock_addr->block_size)/(double)basic_block_size)));
 
   // delete old node
   FreeList[freeList_loc+1].remove(block);
 
-  // insert new nodes
+  // insert new nodes (at front)
   FreeList[freeList_loc].insert(rightBlock_addr);
   FreeList[freeList_loc].insert(leftBlock_addr);
   
@@ -68,11 +67,11 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
 
 };
 
-// Todo  ---------------------------------------------------
+// To  ---------------------------------------------------
 
-// BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
+BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
   
-// }
+}
 
 bool BuddyAllocator::arebuddies (BlockHeader* block1, BlockHeader* block2){
   // checks to see if buddies are free
@@ -81,9 +80,35 @@ bool BuddyAllocator::arebuddies (BlockHeader* block1, BlockHeader* block2){
 
 }
 
-// BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
+BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
+  // get locations of blocks
+  char* left = (char*) block1;
+  char* right = (char*) block2;
 
-// }
+  // reverse pointers if in wrong order
+  if(block1 > block2)
+  {
+    char* temp = left;
+    left = right;
+    right = temp;
+  }
+
+  // find location of FreeList to merge into
+  int merge_loc = log2(block1->block_size/basic_block_size) + 1; // gives index to merge to
+  int del_loc = merge_loc-1; // gives index to delete to
+
+  // delete right and left from freelist (not sure to pass in casted left/right or block1/block2)
+  FreeList[del_loc].remove((BlockHeader*)left);
+  FreeList[del_loc].remove((BlockHeader*)right);
+
+  // double the size of right and add it to bigger memory freelist (is making a new BlockHeader* bigBlock necessary?)
+  BlockHeader* bigBlock = (BlockHeader*) left;
+  FreeList[merge_loc].insert((BlockHeader*)bigBlock);
+  bigBlock->block_size = 2 * block1->block_size; // remember blocks are free by defualt
+  
+  return bigBlock;
+
+}
 
 // -----------------------------------------------------
 
