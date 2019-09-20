@@ -29,7 +29,7 @@ public:
 
 	void remove (BlockHeader* b){  // removes a block from the list
 		BlockHeader* it = head;
-
+		
 		// if b is the first blockheader
 		if(it == b){			
 			// if list has more than one blockheader
@@ -105,7 +105,7 @@ public:
 	/* Allocate _length number of bytes of free memory and returns the 
 		address of the allocated portion. Returns 0 when out of memory. */ 
 
-	int free(char* _a); 
+	void free(char* _a); 
 	/* Frees the section of physical memory previously allocated 
 	   using ’my_malloc’. Returns 0 if everything ok. */ 
    

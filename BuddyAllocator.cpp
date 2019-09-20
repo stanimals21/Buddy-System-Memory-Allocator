@@ -55,8 +55,9 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   
   freeList_loc = int(log2(ceil((double)(rightBlock_addr->block_size)/(double)basic_block_size)));
 
-  // delete old node
+  // delete old node from FreeList
   FreeList[freeList_loc+1].remove(block);
+  block->isFree = false;
 
   // insert new nodes (at front)
   FreeList[freeList_loc].insert(rightBlock_addr);
@@ -67,17 +68,18 @@ BlockHeader* BuddyAllocator::split(BlockHeader* block) {
 
 };
 
-// To  ---------------------------------------------------
-
 BlockHeader* BuddyAllocator::getbuddy (BlockHeader * addr){
-  
+  char* block_addr = (char*) addr;
+  char* charBuddy = ((block_addr - total_mem_ptr) ^ (addr->block_size)) + total_mem_ptr;
+  BlockHeader* buddy = (BlockHeader*) charBuddy;
+  return buddy;
 }
 
 bool BuddyAllocator::arebuddies (BlockHeader* block1, BlockHeader* block2){
-  // checks to see if buddies are free
-  if(block1->isFree == true && block2->isFree == true) {return true;}
-  else {return false;}
-
+  if(block1->isFree == true && block2->isFree == true && block1->block_size == block2->block_size)
+  {return true;}
+  else 
+  {return false;}
 }
 
 BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
@@ -103,14 +105,12 @@ BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
 
   // double the size of right and add it to bigger memory freelist (is making a new BlockHeader* bigBlock necessary?)
   BlockHeader* bigBlock = (BlockHeader*) left;
-  FreeList[merge_loc].insert((BlockHeader*)bigBlock);
+  FreeList[merge_loc].insert(bigBlock);
   bigBlock->block_size = 2 * block1->block_size; // remember blocks are free by defualt
   
   return bigBlock;
 
 }
-
-// -----------------------------------------------------
 
 char* BuddyAllocator::alloc(int _length) {
   /* This preliminary implementation simply hands the call over the 
@@ -143,7 +143,7 @@ char* BuddyAllocator::alloc(int _length) {
   }
   
   // assign attributes to new block (allocating BlockHeader)
-  track->block_size = _length;
+  //track->block_size = _length;
   track->isFree = false;
 
   // remove last element
@@ -153,10 +153,45 @@ char* BuddyAllocator::alloc(int _length) {
   return (char*) (track+1);
 }
 
-int BuddyAllocator::free(char* _a) {
-  /* Same here! */
-  delete _a;
-  return 0;
+void BuddyAllocator::free(char* _a) {
+  // BlockHeader* block = (BlockHeader*) (_a - sizeof(BlockHeader));
+  // int i = int(log2(ceil(((double)block->block_size/(double)basic_block_size))));
+
+  // for(int j = 0; j<FreeList.size(); j++)
+  // {
+  //   BlockHeader* buddy = getbuddy(block);
+  //    if(buddy->isFree == false)
+  //     {
+  //       FreeList[i].insert(block);
+  //       return;
+  //     }
+  //   else
+  //     {
+  //       FreeList[i].insert(buddy);
+  //       block = merge(block, buddy);
+  //       FreeList[i+j].insert(block);
+  //     }
+  // }
+
+  // _a is the address of the start of free memory (before first BlockHeader). Subtract blockheader size to get actual start of memory.
+  BlockHeader* blockAddr = (BlockHeader*) (_a - sizeof(BlockHeader));
+    
+    // gives us index to insert 
+    int i = int(log2(ceil(((double) blockAddr->block_size / (double) basic_block_size))));
+    FreeList[i].insert(blockAddr);
+    
+    int tempSize = blockAddr->block_size;
+    
+    while (blockAddr->block_size < total_memory_size) {
+        BlockHeader* buddy = getbuddy(blockAddr);
+        blockAddr = merge(blockAddr, buddy);
+        int sizeAfterMerge = blockAddr->block_size;
+        if (sizeAfterMerge == tempSize) {
+            break;
+        }
+        tempSize = blockAddr->block_size;
+    }
+    return;
 }
 
 void BuddyAllocator::printlist (){
