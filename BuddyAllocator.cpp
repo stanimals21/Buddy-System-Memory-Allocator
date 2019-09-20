@@ -180,16 +180,16 @@ void BuddyAllocator::free(char* _a) {
     int i = int(log2(ceil(((double) blockAddr->block_size / (double) basic_block_size))));
     FreeList[i].insert(blockAddr);
     
-    int tempSize = blockAddr->block_size;
+    int beforeSize = blockAddr->block_size;
     
     while (blockAddr->block_size < total_memory_size) {
         BlockHeader* buddy = getbuddy(blockAddr);
         blockAddr = merge(blockAddr, buddy);
-        int sizeAfterMerge = blockAddr->block_size;
-        if (sizeAfterMerge == tempSize) {
+        int afterSize = blockAddr->block_size;
+        if (afterSize == beforeSize) {
             break;
         }
-        tempSize = blockAddr->block_size;
+        beforeSize = blockAddr->block_size;
     }
     return;
 }
