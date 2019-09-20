@@ -164,25 +164,25 @@ void BuddyAllocator::free(char* _a) {
   // _a is the address of the start of free memory (before first BlockHeader). Subtract blockheader size to get actual start of memory.
   BlockHeader* blockAddr = (BlockHeader*) (_a - sizeof(BlockHeader));
     
-    // gives us index to insert 
+    // gives index to insert to (greatest index in FreeList)
     int i = int(log2(ceil(((double) blockAddr->block_size / (double) basic_block_size))));
     FreeList[i].insert(blockAddr);
     
-    int beforeSize = blockAddr->block_size;
+    int fullSize = blockAddr->block_size;
     
-    while (blockAddr->block_size < total_memory_size) {
+    while (true) {
         BlockHeader* buddy = getbuddy(blockAddr);
         if(arebuddies(blockAddr,buddy)==true)
         {
           blockAddr = merge(blockAddr, buddy);
-          int afterSize = blockAddr->block_size;
-          if (afterSize == beforeSize) {
+          int mergeSize = blockAddr->block_size;
+          if (mergeSize == fullSize) {
               break;
           }
         }
         else{break;}
 
-        beforeSize = blockAddr->block_size;
+        fullSize = blockAddr->block_size;
     }
     return;
 }
