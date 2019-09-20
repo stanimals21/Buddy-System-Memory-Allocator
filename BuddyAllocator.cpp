@@ -176,13 +176,14 @@ void BuddyAllocator::free(char* _a) {
         {
           blockAddr = merge(blockAddr, buddy);
           int mergeSize = blockAddr->block_size;
-          if (mergeSize == fullSize) {
-              break;
+          // check to see if the full block (at highest index) is fully merged
+          if (mergeSize == fullSize)
+          {
+            break;
           }
         }
+        // break if can't find same sized buddy or buddy is not free
         else{break;}
-
-        fullSize = blockAddr->block_size;
     }
     return;
 }
