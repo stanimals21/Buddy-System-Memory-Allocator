@@ -120,6 +120,8 @@ char* BuddyAllocator::alloc(int _length) {
   
  // iterate through FreeList to find smallest BlockHeader to fit our memory length (start at index 0)
   BlockHeader* space_addr;
+  bool firstSplit = false;
+  int index;
   for(int i = 0; i < FreeList.size(); i++){
     if(FreeList[i].head == nullptr && i == FreeList.size()-1)
     {
@@ -133,6 +135,7 @@ char* BuddyAllocator::alloc(int _length) {
     else if(FreeList[i].head->block_size >= _length + sizeof(BlockHeader))
     {
       space_addr = FreeList[i].head;
+      index = i;
       break;
     }
   }
@@ -140,14 +143,17 @@ char* BuddyAllocator::alloc(int _length) {
   BlockHeader* track = space_addr;
   while((track->block_size/2 >= (_length + sizeof(BlockHeader))) && (track->block_size/2 >= basic_block_size)) {
     track = split(track);
+    firstSplit = true;
   }
   
   // assign attributes to new block (allocating BlockHeader)
-  //track->block_size = _length;
   track->isFree = false;
 
   // remove last element
-  FreeList[freeList_loc].remove(track);
+  if(firstSplit == true)
+    FreeList[freeList_loc].remove(track);
+  else
+    FreeList[index].remove(track);
 
   // return removed element
   return (char*) (track+1);
