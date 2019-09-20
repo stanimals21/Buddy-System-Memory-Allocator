@@ -32,12 +32,12 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
 }
 
 BuddyAllocator::~BuddyAllocator (){
-	// for(int i=0; i<FreeList.size(); i++)
-  // {
-  //   while(FreeList[i].head != NULL){
-  //     delete FreeList;
-  //   }
-  // }
+	for(int i=0; i<FreeList.size(); i++)
+  {
+    if(FreeList[i].head != NULL){
+      delete FreeList[i].head;
+    }
+  }
 }
 
 // private BuddyAllocator Functions
