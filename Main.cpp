@@ -8,7 +8,9 @@ void easytest(BuddyAllocator* ba){
   // here are a few examples
   ba->printlist();
   // allocating a byte
-  char * mem = ba->alloc(250);
+  char * mem = ba->alloc(1);
+  char * mem2 = ba->alloc(2);
+  //char * mem3 = ba->alloc(3);
   
   // now print again, how should the list look now
   ba->printlist();
@@ -19,7 +21,7 @@ void easytest(BuddyAllocator* ba){
 
 int main(int argc, char ** argv) {
 
-  int basic_block_size = 128, memory_length = 512;
+  int basic_block_size = 128, memory_length = 1024*1024*128;
 
   // create memory manager
   BuddyAllocator * allocator = new BuddyAllocator(basic_block_size, memory_length);

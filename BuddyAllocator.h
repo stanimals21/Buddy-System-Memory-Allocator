@@ -48,7 +48,7 @@ public:
 			it = head->next;
 			BlockHeader* prevIt = head;
 
-			while(it != b && it != nullptr)
+			while(it != b)
 			{
 				it = it->next;
 				prevIt = prevIt->next;

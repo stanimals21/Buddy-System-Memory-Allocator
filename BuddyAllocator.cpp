@@ -160,24 +160,6 @@ char* BuddyAllocator::alloc(int _length) {
 }
 
 void BuddyAllocator::free(char* _a) {
-  // BlockHeader* block = (BlockHeader*) (_a - sizeof(BlockHeader));
-  // int i = int(log2(ceil(((double)block->block_size/(double)basic_block_size))));
-
-  // for(int j = 0; j<FreeList.size(); j++)
-  // {
-  //   BlockHeader* buddy = getbuddy(block);
-  //    if(buddy->isFree == false)
-  //     {
-  //       FreeList[i].insert(block);
-  //       return;
-  //     }
-  //   else
-  //     {
-  //       FreeList[i].insert(buddy);
-  //       block = merge(block, buddy);
-  //       FreeList[i+j].insert(block);
-  //     }
-  // }
 
   // _a is the address of the start of free memory (before first BlockHeader). Subtract blockheader size to get actual start of memory.
   BlockHeader* blockAddr = (BlockHeader*) (_a - sizeof(BlockHeader));
@@ -190,11 +172,16 @@ void BuddyAllocator::free(char* _a) {
     
     while (blockAddr->block_size < total_memory_size) {
         BlockHeader* buddy = getbuddy(blockAddr);
-        blockAddr = merge(blockAddr, buddy);
-        int afterSize = blockAddr->block_size;
-        if (afterSize == beforeSize) {
-            break;
+        if(arebuddies(blockAddr,buddy)==true)
+        {
+          blockAddr = merge(blockAddr, buddy);
+          int afterSize = blockAddr->block_size;
+          if (afterSize == beforeSize) {
+              break;
+          }
         }
+        else{break;}
+
         beforeSize = blockAddr->block_size;
     }
     return;
