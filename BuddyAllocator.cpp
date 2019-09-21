@@ -6,22 +6,18 @@ using namespace std;
 BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length){
   basic_block_size = _basic_block_size;
   total_memory_size = _total_memory_length;
-  
-  // ensure that bbs and total_mem are multiples of 2
-  int bbs = pow(2,log2(_basic_block_size));
-  int total_mem_value = pow(2,log2(_total_memory_length));
 
   // initialize address pointing to head of memory chunk
   total_mem_ptr = new char[_total_memory_length];
 
   // create FreeList
   BlockHeader* fullBlock = (BlockHeader*) total_mem_ptr; // initial block
-  fullBlock->block_size = total_mem_value;
+  fullBlock->block_size = total_memory_size;
   fullBlock->isFree = true;
   fullBlock->next = nullptr;
 
   // calculate number of lists in FreeList and pushback that many freelists
-  int listSize = log2(total_mem_value)-log2(bbs)+1;
+  int listSize = log2(total_memory_size)-log2(basic_block_size)+1;
   for(int i =0; i<listSize; i++){
     FreeList.push_back(LinkedList());
     FreeList.at(i).head = NULL;
@@ -32,15 +28,8 @@ BuddyAllocator::BuddyAllocator (int _basic_block_size, int _total_memory_length)
 }
 
 BuddyAllocator::~BuddyAllocator (){
-	for(int i=0; i<FreeList.size(); i++)
-  {
-    if(FreeList[i].head != NULL){
-      delete FreeList[i].head;
-    }
-  }
+  delete total_mem_ptr;
 }
-
-// private BuddyAllocator Functions
 
 BlockHeader* BuddyAllocator::split(BlockHeader* block) {
   char* rightAddr = (char*) block + block->block_size/2;
@@ -99,11 +88,11 @@ BlockHeader* BuddyAllocator::merge (BlockHeader* block1, BlockHeader* block2){
   int merge_loc = log2(block1->block_size/basic_block_size) + 1; // gives index to merge to
   int del_loc = merge_loc-1; // gives index to delete to
 
-  // delete right and left from freelist (not sure to pass in casted left/right or block1/block2)
+  // delete right and left from freelist
   FreeList[del_loc].remove((BlockHeader*)left);
   FreeList[del_loc].remove((BlockHeader*)right);
 
-  // double the size of right and add it to bigger memory freelist (is making a new BlockHeader* bigBlock necessary?)
+  // double the size of right and add it to bigger memory freelist
   BlockHeader* bigBlock = (BlockHeader*) left;
   FreeList[merge_loc].insert(bigBlock);
   bigBlock->block_size = 2 * block1->block_size; // remember blocks are free by defualt
@@ -128,11 +117,7 @@ char* BuddyAllocator::alloc(int _length) {
       return nullptr;
     }
 
-    if(FreeList[i].head == nullptr)
-    {
-      // skip iteration if true
-    }
-    else if(FreeList[i].head->block_size >= _length + sizeof(BlockHeader))
+    if(FreeList[i].head != nullptr && FreeList[i].head->block_size >= _length + sizeof(BlockHeader))
     {
       space_addr = FreeList[i].head;
       index = i;
