@@ -44,9 +44,14 @@ int main(int argc, char ** argv) {
   }  
 
   // input checks
-  if(ceil(log2(basic_block_size)) != floor(log2(basic_block_size)))
+  if(memory_length < 0 || basic_block_size < 0)
   {
-    cout << "Invalid input: basic block size must be of the form 2^i, where i is an integer." << endl;
+    cout << "Invalid input: memory length and bbs cannot be negative." << endl;
+    return 0;
+  }
+  else if((ceil(log2(basic_block_size)) != floor(log2(basic_block_size)) || (ceil(log2(memory_length)) != floor(log2(memory_length)))))
+  {
+    cout << "Invalid input: basic block size and memory length must be of the form 2^i, where i is an integer." << endl;
     return 0;
   }
   else if(memory_length % basic_block_size != 0)
