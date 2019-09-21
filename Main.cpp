@@ -24,21 +24,22 @@ void easytest(BuddyAllocator* ba){
 
 int main(int argc, char ** argv) {
 
-  int basic_block_size = 128, memory_length = 1024*1024*128;
+  int basic_block_size = 128, memory_length = 1024*512;
 
   // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
   int opt;
 
-  while((opt = getopt(argc, argv, "b:m:")) != -1)  
+  while((opt = getopt(argc, argv, "b:s:")) != -1)  
   {  
     if((char)opt == 'b'){
       basic_block_size = stoi(optarg);
     }
-    else if ((char)opt == 'm'){
+    else if ((char)opt == 's'){
       memory_length = stoi(optarg); 
     }
     else{
-      break;
+      cout << "Invalid input: please use tags -b or -s." << endl;
+      return 0;
     }
   }  
 
